@@ -16,7 +16,7 @@ cacheFileDir="/tmp/ddns_cache/"
 cacheFileExt=".ddns.tmp"
 ## Set default to ipv4, can be overridden by --ip-version
 ipVersion="ipv4"
-
+ 
 fail () {
     echo "$(basename $0): $1"
     exit 1
