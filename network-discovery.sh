@@ -113,12 +113,16 @@ fi
 
 if [ "$ipVersion" = "ipv4" ]; then
     searchRecordType="A"
-    netScan=$(arp -a| awk '{print $2 " " $4}'|sed 's|[(),]||g')
+    ## Leaving older/alternate arp methods commented out
+    #netScan=$(cat /proc/net/arp | awk '{print $1 " " $4}'|sed 's|[(),]||g')
+    #netScan=$(arp -a| awk '{print $2 " " $4}'|sed 's|[(),]||g')
+    netScan=$(ip -4 neigh | awk '{print $1 " " $5}')
 elif [ "$ipVersion" = "ipv6" ]; then
     searchRecordType="AAAA"
     ## Check for either ip or ndp for ipv6 network discovery.
     if command -v ip > /dev/null 2>&1 ; then
         netScan=$(ip -6 neigh |egrep -v fe80 | awk '{print $1 " " $5}')
+        netScan=$(ip -6 neigh |egrep -v '(^fe80|^fd)' | awk '{print $1 " " $5}')
     elif command -v ndp > /dev/null 2>&1 ; then
         netScan=$(ndp -a |egrep -v fe80 | awk '{print $1 " " $2}')
     fi
