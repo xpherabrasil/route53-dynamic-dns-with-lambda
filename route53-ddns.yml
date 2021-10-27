@@ -5,7 +5,7 @@ Description: Serverless dynamic DNS & device discovery service for ipv4 & ipv6
 Parameters:
   route53ZoneName:
     Type: String
-    Default: 'yourdomain.net'
+    Default: 'xphera.cloud'
     Description: "Required: Route53 Zone, either existing or name to be created. -- Must not end in '.' -- If it's an existing zone, it must match the zone id passed in route53ZoneId."
     #AllowedPattern: ^([a-zA-Z0-9-].)+[a-zA-Z0-9-]$  #commented out to support unicode
     
@@ -198,7 +198,7 @@ Resources:
     Properties:
       FunctionName: !Sub ${AWS::StackName}-ddns
       Handler: index.lambda_handler
-      Runtime: python2.7
+      Runtime: python3.9
       MemorySize: 512
       Timeout: 30
       Role: !GetAtt lambdaDdnsRole.Arn
@@ -223,7 +223,7 @@ Resources:
     Properties:
       FunctionName: !Sub ${AWS::StackName}-setup
       Handler: index.lambda_handler
-      Runtime: python2.7
+      Runtime: python3.9
       Timeout: 120
       Role: !GetAtt lambdaDdnsRole.Arn
       Environment:
@@ -278,7 +278,7 @@ Resources:
     Properties:
       FunctionName: !Sub ${AWS::StackName}-source-to-s3
       Handler: index.lambda_handler
-      Runtime: python2.7
+      Runtime: python3.9
       Timeout: 120
       Role: !GetAtt lambdaDdnsRole.Arn
       Environment:
@@ -290,9 +290,9 @@ Resources:
           import boto3
           import os
           import zipfile
-          import httplib
+          import http.client
           import uuid
-          import urlparse
+          from urllib import parse as urlparse
           import json
            
           print('Loading function')
@@ -308,7 +308,7 @@ Resources:
               if 'ResponseURL' in request and request['ResponseURL']:
                   url = urlparse.urlparse(request['ResponseURL'])
                   body = json.dumps(response)
-                  https = httplib.HTTPSConnection(url.hostname)
+                  https = http.client.HTTPSConnection(url.hostname)
                   https.request('PUT', url.path+'?'+url.query, body)
               return response
           
@@ -342,7 +342,7 @@ Resources:
               except:
                 pass
               lambda_file = open('/tmp/index.py', 'w')
-              os.chmod('/tmp/index.py', 0777)
+              os.chmod('/tmp/index.py', 0o0777)
               lambda_file.write(lambda_body)
               lambda_file.close()
               ## Build the zip archive
@@ -370,7 +370,7 @@ Resources:
                 ## will cause a stack rollback on failure and can leave the stack in a state that requires deletion.
                 #response['Status'] = 'FAILED'
               # Log it!
-              print(str(s3_response))
+              # print(str(s3_response))
               print('Response Text: ' + str(response))
               return send_response(event, response)
 
@@ -399,8 +399,8 @@ Resources:
             import random
             import os   
             import uuid
-            import httplib
-            import urlparse
+            import http.client
+            from urllib import parse as urlparse
             import json
             import time
             
@@ -424,7 +424,7 @@ Resources:
                 if 'ResponseURL' in request and request['ResponseURL']:
                     url = urlparse.urlparse(request['ResponseURL'])
                     body = json.dumps(response)
-                    https = httplib.HTTPSConnection(url.hostname)
+                    https = http.client.HTTPSConnection(url.hostname)
                     https.request('PUT', url.path+'?'+url.query, body)
                     print(url.hostname)
                     print('PUT', url.path+'?'+url.query, body)
