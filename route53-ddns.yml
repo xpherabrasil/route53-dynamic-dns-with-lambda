@@ -44,7 +44,7 @@ Parameters:
     Description: "Affects price, change propagation times, latency to clients.  See: https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/PriceClass.html"
         
   acmCertificateARN:
-    Default: ''
+    Default: 'arn:aws:acm:sa-east-1:678711180795:certificate/df21a8a3-49a4-45ff-bde4-2a1aadb7c623'
     Type: String
     Description: "Populate to use ACM Certificate.  Required to use a custom dns endpoint (Alias) for your API. Full ARN of an ACM SSL Certificate in us-east-1 Region.  -- i.e. arn:aws:acm:us-east-1:123456789012:certificate/a1aaab22-11ab-ab12-cd34-12345abc0ab0"
 
@@ -362,13 +362,16 @@ Resources:
                       's3Success': 'true',
                       file_name + '-S3ObjectVersion': s3_response['VersionId']
                   }
+                  
+                  #print(str(s3_response))
+                  
                   response['Reason'] = s3_key + ' added to S3'
                   print(str(s3_response['VersionId']))
               except Exception as E:
                 response['Reason'] = 'Event Failed - See CloudWatch logs for the Lamba function backing the custom resource for details'
                 ## Un-comment the line below to send a true failure to CFN
                 ## will cause a stack rollback on failure and can leave the stack in a state that requires deletion.
-                #response['Status'] = 'FAILED'
+                response['Status'] = 'FAILED'
               # Log it!
               # print(str(s3_response))
               print('Response Text: ' + str(response))
