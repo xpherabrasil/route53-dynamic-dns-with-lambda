@@ -310,6 +310,7 @@ Resources:
                   body = json.dumps(response)
                   https = http.client.HTTPSConnection(url.hostname)
                   https.request('PUT', url.path+'?'+url.query, body)
+                  print('url:' + url)
               return response
           
           def lambda_handler(event, context):
@@ -326,13 +327,19 @@ Resources:
                   response['PhysicalResourceId'] = str(uuid.uuid4())
           
               # There is nothing to do for a delete request
+              print('There is nothing to do for a delete request')
               if event['RequestType'] == 'Delete':
                   return send_response(event, response)
               ## Get the S3 Bucket passed in from CFN
+              print('Get the S3 Bucket passed in from CFN')
               s3TargetBucket=event['ResourceProperties']['s3TargetBucket']
+              print(s3TargetBucket)
               ## Get the file contents to put in S3 from CFN
+              print('Get the file contents to put in S3 from CFN')
               lambda_body=event['ResourceProperties']['lambda_body']
               file_name=event['ResourceProperties']['file_name']
+              print(lambda_body)
+              print(file_name)
               zip_file = '/tmp/' + file_name + '.zip'
               s3_key = file_name + '.zip'
               ## Write the body variable to a file
@@ -341,17 +348,20 @@ Resources:
                 os.remove('/tmp/index.py') # delete old file in case function is re-used
               except:
                 pass
+              print('open lambda_file')
               lambda_file = open('/tmp/index.py', 'w')
               os.chmod('/tmp/index.py', 0o0777)
               lambda_file.write(lambda_body)
               lambda_file.close()
               ## Build the zip archive
+              print('build the zip archive')
               zip_archive = zipfile.ZipFile(zip_file, 'w')
               zip_archive.write('/tmp/index.py', 'index.py')
               zip_archive.close()
               zip_file = open(zip_file, 'r')
-          
+              
               ## Put the archive in S3
+              print('Put the archive in S3')
               try:
                   s3_response = s3.put_object(
                   Body= zip_file.read(),
